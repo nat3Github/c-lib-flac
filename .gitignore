@@ -102,3 +102,6 @@ CTestTestfile.cmake
 _deps
 
 /.vs*/
+.zig-cache/
+zig-out/
+zig-pkg/
