@@ -2,7 +2,7 @@
     .name = .flac,
     .fingerprint = 0xd6992f831d3fbce1,
     .version = "1.5.0",
-    .minimum_zig_version = "0.16.0",
+    .minimum_zig_version = "0.17.0",
     .dependencies = .{
         .ogg = .{
             .url = "git+https://github.com/nat3Github/c-lib-ogg#5cf65748a2c4c54992014ba1c0ac7fb8accc56a9",
