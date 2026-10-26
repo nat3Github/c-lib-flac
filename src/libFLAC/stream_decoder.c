@@ -1767,13 +1767,18 @@ FLAC__bool read_metadata_(FLAC__StreamDecoder *decoder)
 		block.length = length;
 
 		if(type == FLAC__METADATA_TYPE_APPLICATION) {
-			if(!FLAC__bitreader_read_byte_block_aligned_no_crc(decoder->private_->input, block.data.application.id, FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8))
-				return false; /* read_callback_ sets the state for us */
-
 			if(real_length < FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8) { /* underflow check */
-				decoder->protected_->state = FLAC__STREAM_DECODER_MEMORY_ALLOCATION_ERROR;/*@@@@@@ maybe wrong error? need to resync?*/
+				/* Block too short to hold its ID: corrupt metadata, not
+				 * an allocation failure. Stop parsing metadata, like for
+				 * other blocks whose content does not fit their length */
+				send_error_to_client_(decoder, FLAC__STREAM_DECODER_ERROR_STATUS_BAD_METADATA);
+				if(decoder->protected_->state == FLAC__STREAM_DECODER_READ_METADATA)
+					decoder->protected_->state = FLAC__STREAM_DECODER_SEARCH_FOR_FRAME_SYNC;
 				return false;
 			}
+
+			if(!FLAC__bitreader_read_byte_block_aligned_no_crc(decoder->private_->input, block.data.application.id, FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8))
+				return false; /* read_callback_ sets the state for us */
 
 			real_length -= FLAC__STREAM_METADATA_APPLICATION_ID_LEN/8;
 
